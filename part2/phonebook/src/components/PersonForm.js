@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import personsService from "../services/persons.js";
 
 function PersonForm({ setPersons, persons }) {
   const [newName, setNewName] = useState("");
@@ -17,16 +18,43 @@ function PersonForm({ setPersons, persons }) {
       name: newName,
       number: newNumber,
     };
-    persons.forEach((person) => {
-      if (person.name === newPerson.name) {
-        alert(`${newPerson.name} is already on the list`);
+    const foundPerson = persons.find((person) => {
+      return person.name === newPerson.name;
+    });
+    if (foundPerson) {
+      if (
+        window.confirm(
+          `${foundPerson.name} is already on the list. Do you want to update their number?`
+        )
+      ) {
+        personsService
+          .update(foundPerson.id, newPerson)
+          .then((updatedPerson) => {
+            console.log(updatedPerson);
+            setPersons(
+              persons.map((person) => {
+                if (person.name === newPerson.name) {
+                  return { ...person, number: newPerson.number };
+                } else {
+                  return person;
+                }
+              })
+            );
+          });
         setNewName("");
+        setNewNumber("");
       } else {
-        setPersons(persons.concat(newPerson));
         setNewName("");
         setNewNumber("");
       }
-    });
+    } else {
+      setPersons(persons.concat(newPerson));
+      setNewName("");
+      setNewNumber("");
+      personsService.create(newPerson).then((addedPerson) => {
+        console.log(addedPerson);
+      });
+    }
   };
 
   return (

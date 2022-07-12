@@ -1,15 +1,14 @@
 import { useState, useEffect } from "react";
 import PersonForm from "./components/PersonForm";
 import Persons from "./components/Persons";
-import axios from "axios";
+import personService from "./services/persons";
 
 const App = () => {
   const [persons, setPersons] = useState([]);
 
   useEffect(() => {
-    axios.get("http://localhost:3000/persons").then((response) => {
-      console.log("data fetched");
-      setPersons(response.data);
+    personService.getAll().then((returnedPersons) => {
+      setPersons(returnedPersons);
     });
   }, []);
 
@@ -30,7 +29,11 @@ const App = () => {
       </form>
       <PersonForm persons={persons} setPersons={setPersons} />
       <h2>Numbers</h2>
-      <Persons persons={persons} filterValue={filterValue} />
+      <Persons
+        setPersons={setPersons}
+        persons={persons}
+        filterValue={filterValue}
+      />
     </div>
   );
 };
